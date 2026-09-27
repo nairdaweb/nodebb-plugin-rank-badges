@@ -1,19 +1,31 @@
 # nodebb-plugin-rank-badges
 
-Rank badges for **NodeBB 4.x**. Users earn ranks from their post count and/or reputation; members of
-chosen groups (Administrator, Moderator or any other group) get a group badge instead. The badge
-appears next to the author's name in posts and on the profile.
+[![npm](https://img.shields.io/npm/v/nodebb-plugin-rank-badges.svg)](https://www.npmjs.com/package/nodebb-plugin-rank-badges)
+[![NodeBB](https://img.shields.io/badge/NodeBB-4.x-1e4fd8.svg)](https://nodebb.org)
+[![License: MIT](https://img.shields.io/badge/license-MIT-e89350.svg)](LICENSE)
 
-*Polska wersja: [README.pl.md](README.pl.md).*
+Rank badges for **NodeBB 4**. Members earn ranks from their post count, their reputation or both, and
+members of selected groups (administrators, moderators or any group you choose) get a group badge
+instead. The badge sits next to the author's name in every post and on the profile page, in the
+viewer's language, and everything is configured in the ACP — no template edits needed.
 
-- **Compatibility:** NodeBB `^4.0.0`, tested with NodeBB 4.16 and the Harmony theme; Node.js 22 or newer
-  (the version NodeBB 4.16 requires).
-- **Author:** [nairda](https://wirelab.pl)
-- **Source and issues:** [github.com/nairdaweb/nodebb-plugin-rank-badges](https://github.com/nairdaweb/nodebb-plugin-rank-badges) ·
-  [report a bug](https://github.com/nairdaweb/nodebb-plugin-rank-badges/issues)
+![Rank badges in a topic, light theme](https://raw.githubusercontent.com/nairdaweb/nodebb-plugin-rank-badges/main/docs/screenshot-posts-light.png)
+![Rank badges in a topic, dark theme](https://raw.githubusercontent.com/nairdaweb/nodebb-plugin-rank-badges/main/docs/screenshot-posts-dark.png)
 
-![Badges in posts (light)](https://raw.githubusercontent.com/nairdaweb/nodebb-plugin-rank-badges/main/docs/screenshot-posts-light.png)
-![Badges in posts (dark)](https://raw.githubusercontent.com/nairdaweb/nodebb-plugin-rank-badges/main/docs/screenshot-posts-dark.png)
+## Quick start
+
+```sh
+cd /path/to/nodebb
+npm install nodebb-plugin-rank-badges
+./nodebb activate nodebb-plugin-rank-badges
+./nodebb build && ./nodebb restart
+```
+
+Then open **ACP → Plugins → Rank badges**. The default six-level ladder works out of the box; adjust
+names, thresholds, images and colours to suit your community.
+
+- **Requirements:** NodeBB `^4.0.0` (tested with 4.16 and the Harmony theme), Node.js 22+.
+- **Author:** [nairda](https://wirelab.pl) · **Issues:** [GitHub](https://github.com/nairdaweb/nodebb-plugin-rank-badges/issues)
 
 ## Features
 
@@ -35,6 +47,7 @@ appears next to the author's name in posts and on the profile.
   group for all authors on a page (no extra queries per post).
 - **Themeable**: every colour and size is a CSS custom property.
 - **ACP in English and Polish**, with validation, warnings and a preview of the saved badges.
+- **Translations** for badge names: en-GB and pl included; other languages fall back to en-GB.
 
 Default ladder (change everything in the ACP):
 
@@ -51,20 +64,8 @@ Default ladder (change everything in the ACP):
 
 ## Installation
 
-From the NodeBB directory:
-
-```sh
-cd /path/to/nodebb
-npm install nodebb-plugin-rank-badges
-./nodebb activate nodebb-plugin-rank-badges
-./nodebb build
-./nodebb restart
-```
-
-Alternatively install and activate it in **ACP → Extend → Plugins**, then rebuild and restart.
-
-Declared compatibility: NodeBB `^4.0.0` (`package.json` → `nbbpm.compatibility`); requires Node.js 22+.
-NodeBB 3.x and older are not supported.
+Install from the command line (see *Quick start*) or in **ACP → Extend → Plugins**, then rebuild and
+restart NodeBB. NodeBB 3.x and older are not supported.
 
 ## Configuration
 
