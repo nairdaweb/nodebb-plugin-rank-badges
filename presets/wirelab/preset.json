@@ -1,0 +1,16 @@
+{
+	"name": "wirelab",
+	"description": "Shark and hedgehog badges from forum.wirelab.pl. Artwork © nairda (wirelab.pl); not covered by the MIT licence of the code.",
+	"ranks": [
+		{ "key": "rank-1", "names": {}, "minPosts": 0, "minReputation": 0, "image": "rank-1.png", "color": "" },
+		{ "key": "rank-2", "names": {}, "minPosts": 5, "minReputation": 0, "image": "rank-2.png", "color": "" },
+		{ "key": "rank-3", "names": {}, "minPosts": 25, "minReputation": 5, "image": "rank-3.png", "color": "" },
+		{ "key": "rank-4", "names": {}, "minPosts": 75, "minReputation": 20, "image": "rank-4.png", "color": "" },
+		{ "key": "rank-5", "names": {}, "minPosts": 200, "minReputation": 50, "image": "rank-5.png", "color": "" },
+		{ "key": "rank-6", "names": {}, "minPosts": 500, "minReputation": 150, "image": "rank-6.png", "color": "" }
+	],
+	"special": [
+		{ "group": "administrators", "key": "group-administrators", "names": {}, "icon": "", "image": "admin.png", "color": "" },
+		{ "group": "Global Moderators", "key": "group-moderators", "names": {}, "icon": "", "image": "moderator.png", "color": "" }
+	]
+}

@@ -1,0 +1,13 @@
+{
+	"rank-1": "Nowy na warsztacie",
+	"rank-2": "Praktykant",
+	"rank-3": "Majsterkowicz",
+	"rank-4": "Technik",
+	"rank-5": "Inżynier",
+	"rank-6": "Konstruktor",
+	"group-administrators": "Administrator",
+	"group-moderators": "Moderator",
+	"aria.rank": "Ranga %1 z %2: %3",
+	"aria.special": "%1",
+	"ladder.title": "Rangi forum"
+}

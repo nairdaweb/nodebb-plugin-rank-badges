@@ -1,0 +1,25 @@
+{
+	"id": "nodebb-plugin-rank-badges",
+	"url": "https://github.com/nairdaweb/nodebb-plugin-rank-badges",
+	"library": "library.js",
+	"hooks": [
+		{ "hook": "static:app.load", "method": "init" },
+		{ "hook": "static:api.routes", "method": "addApiRoutes" },
+		{ "hook": "filter:admin.header.build", "method": "addAdminNavigation" },
+		{ "hook": "action:settings.set", "method": "onSettingsSet" },
+		{ "hook": "filter:posts.getUserInfoForPosts", "method": "onGetUserInfoForPosts" },
+		{ "hook": "filter:helpers.getUserDataByUserSlug", "method": "onAccountData" },
+		{ "hook": "filter:middleware.render", "method": "onRender", "priority": 20 }
+	],
+	"scss": ["scss/rank-badges.scss"],
+	"scripts": ["public/client.js"],
+	"modules": {
+		"../admin/plugins/rank-badges.js": "public/admin.js"
+	},
+	"staticDirs": {
+		"presets": "presets"
+	},
+	"templates": "templates",
+	"languages": "languages",
+	"defaultLang": "en-GB"
+}

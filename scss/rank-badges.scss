@@ -1,0 +1,125 @@
+// nodebb-plugin-rank-badges: badge styles, compiled into the forum CSS through "scss" in
+// plugin.json. Markup comes from lib/render.js.
+//
+// Every colour and size is a CSS custom property, so a theme can restyle the badge without
+// overriding selectors. Defaults use Bootstrap 5.3 variables and work in light and dark mode.
+
+:root, [data-bs-theme] {
+	--rank-badge-height: 1.5rem;
+	--rank-badge-radius: .45rem;
+	--rank-badge-font-size: .78rem;
+	--rank-badge-font-weight: 700;
+	--rank-badge-gap: .4rem;
+	--rank-badge-padding-x: .5rem;
+	--rank-badge-image-size: 1.25rem;
+	--rank-badge-image-size-lg: 2.5rem;
+
+	// Tier 1 (low levels), tier 2 (middle), tier 3 (top) and group badges.
+	--rank-badge-tier-1-bg: var(--bs-tertiary-bg);
+	--rank-badge-tier-1-fg: var(--bs-emphasis-color);
+	--rank-badge-tier-1-led: var(--bs-secondary-color);
+	--rank-badge-tier-2-bg: rgba(var(--bs-primary-rgb), .12);
+	--rank-badge-tier-2-fg: var(--bs-primary-text-emphasis);
+	--rank-badge-tier-2-led: var(--bs-primary);
+	--rank-badge-tier-3-bg: rgba(var(--bs-warning-rgb), .16);
+	--rank-badge-tier-3-fg: var(--bs-warning-text-emphasis);
+	--rank-badge-tier-3-led: var(--bs-warning);
+	--rank-badge-special-bg: var(--bs-emphasis-color);
+	--rank-badge-special-fg: var(--bs-body-bg);
+	--rank-badge-led-off: var(--bs-border-color);
+}
+
+.rank-badge {
+	// Private variables (--_*) hold the resolved colours; modifiers below only swap them.
+	--_bg: var(--rank-badge-tier-1-bg);
+	--_fg: var(--rank-badge-tier-1-fg);
+	--_led: var(--rank-badge-tier-1-led);
+
+	display: inline-flex;
+	align-items: center;
+	gap: var(--rank-badge-gap);
+	height: var(--rank-badge-height);
+	max-width: 100%;
+	padding: 0 var(--rank-badge-padding-x);
+	border-radius: var(--rank-badge-radius);
+	background: var(--_bg);
+	color: var(--_fg);
+	font-size: var(--rank-badge-font-size);
+	font-weight: var(--rank-badge-font-weight);
+	line-height: 1;
+	white-space: nowrap;
+	vertical-align: middle;
+	text-decoration: none;
+
+	&--tier-2 { --_bg: var(--rank-badge-tier-2-bg); --_fg: var(--rank-badge-tier-2-fg); --_led: var(--rank-badge-tier-2-led); }
+	&--tier-3 { --_bg: var(--rank-badge-tier-3-bg); --_fg: var(--rank-badge-tier-3-fg); --_led: var(--rank-badge-tier-3-led); }
+	&--special { --_bg: var(--rank-badge-special-bg); --_fg: var(--rank-badge-special-fg); --_led: currentColor; }
+
+	// Colour chosen in the ACP: accent for the bar/border, background stays readable.
+	// lib/render.js sets --rank-badge-accent inline only when a colour is configured, hence the
+	// attribute selector.
+	&[style*="--rank-badge-accent"] {
+		--_led: var(--rank-badge-accent);
+		box-shadow: inset 0 0 0 1.5px var(--rank-badge-accent);
+	}
+	&--special[style*="--rank-badge-accent"] {
+		--_bg: var(--rank-badge-accent);
+		--_fg: #fff;
+		box-shadow: none;
+	}
+
+	&__name {
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	&__icon { font-size: .9em; }
+
+	&__img {
+		width: var(--rank-badge-image-size);
+		height: var(--rank-badge-image-size);
+		margin-left: calc(var(--rank-badge-padding-x) * -.6);
+		flex: none;
+		object-fit: contain;
+		border-radius: 50%;
+	}
+
+	// Level bar: one segment per rank, lit up to the user's level.
+	&__bar {
+		display: inline-flex;
+		gap: 2px;
+		flex: none;
+		i {
+			display: block;
+			width: 4px;
+			height: .7rem;
+			border-radius: 1px;
+			background: var(--rank-badge-led-off);
+			&.on { background: var(--_led); }
+		}
+	}
+
+	// With an image the bar is only a fallback (client.js marks broken images).
+	&--image &__bar { display: none; }
+	&--image-failed &__img { display: none; }
+	&--image-failed &__bar { display: inline-flex; }
+
+	&--lg {
+		--rank-badge-height: 2rem;
+		--rank-badge-font-size: .875rem;
+		--rank-badge-image-size: var(--rank-badge-image-size-lg);
+		.rank-badge__img { margin-top: -.25rem; margin-bottom: -.25rem; }
+	}
+}
+
+// Wrapper used by the plugin on profile pages.
+.rank-badges-profile {
+	display: inline-flex;
+	align-items: center;
+}
+
+// Windows high-contrast mode drops backgrounds; keep the badge outline and the lit segments visible.
+@media (forced-colors: active) {
+	.rank-badge { border: 1px solid CanvasText; }
+	.rank-badge__bar i.on { background: CanvasText; }
+}
