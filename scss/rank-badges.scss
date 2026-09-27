@@ -39,6 +39,8 @@
 	align-items: center;
 	gap: var(--rank-badge-gap);
 	height: var(--rank-badge-height);
+	// Lets the badge shrink inside flex rows (post header) so the name can end with an ellipsis.
+	min-width: 0;
 	max-width: 100%;
 	padding: 0 var(--rank-badge-padding-x);
 	border-radius: var(--rank-badge-radius);
@@ -62,18 +64,25 @@
 		--_led: var(--rank-badge-accent);
 		box-shadow: inset 0 0 0 1.5px var(--rank-badge-accent);
 	}
+	// Group badges use the accent as background; lib/render.js sets --rank-badge-accent-fg to
+	// black or white from the colour's luminance (hex colours only; var(--…) keeps white).
 	&--special[style*="--rank-badge-accent"] {
 		--_bg: var(--rank-badge-accent);
-		--_fg: #fff;
+		--_fg: var(--rank-badge-accent-fg, #fff);
 		box-shadow: none;
 	}
 
 	&__name {
+		min-width: 0;
 		overflow: hidden;
 		text-overflow: ellipsis;
 	}
 
 	&__icon { font-size: .9em; }
+	&__icon, &__fallback { flex: none; }
+
+	// Shown only when the image fails and there is no bar or group icon to fall back to.
+	&__fallback { display: none; font-size: .9em; }
 
 	&__img {
 		width: var(--rank-badge-image-size);
@@ -84,11 +93,19 @@
 		border-radius: 50%;
 	}
 
-	// Level bar: one segment per rank, lit up to the user's level.
+	// Level bar: one segment per rank, lit up to the user's level. Long ladders (more than 10
+	// ranks, lib/render.js MAX_BAR_SEGMENTS) show "level/total" instead (--count).
 	&__bar {
 		display: inline-flex;
 		gap: 2px;
 		flex: none;
+		max-width: 5rem;
+		overflow: hidden;
+		&--count {
+			font-size: .85em;
+			font-variant-numeric: tabular-nums;
+			color: var(--_led);
+		}
 		i {
 			display: block;
 			width: 4px;
@@ -103,6 +120,7 @@
 	&--image &__bar { display: none; }
 	&--image-failed &__img { display: none; }
 	&--image-failed &__bar { display: inline-flex; }
+	&--image-failed &__fallback { display: inline-block; }
 
 	&--lg {
 		--rank-badge-height: 2rem;

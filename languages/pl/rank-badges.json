@@ -5,9 +5,10 @@
 	"rank-4": "Technik",
 	"rank-5": "Inżynier",
 	"rank-6": "Konstruktor",
+	"rank-n": "Ranga %1",
 	"group-administrators": "Administrator",
 	"group-moderators": "Moderator",
+	"group-generic": "Zespół",
 	"aria.rank": "Ranga %1 z %2: %3",
-	"aria.special": "%1",
-	"ladder.title": "Rangi forum"
+	"aria.special": "%1"
 }
