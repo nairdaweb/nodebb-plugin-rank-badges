@@ -189,5 +189,5 @@ npm run lint
 
 - **Kod:** MIT © [nairda](https://wirelab.pl), zob. [LICENSE](LICENSE).
 - **Grafiki presetu `wirelab`** (`presets/wirelab/*.png`, `*.svg`): © nairda (wirelab.pl), **nie** są
-  objęte licencją MIT i nie wchodzą do paczki npm. Warunki licencji nie zostały jeszcze ustalone (zob.
-  `presets/wirelab/LICENSE.md` w repozytorium); do tego czasu żadna licencja nie jest udzielona.
+  objęte licencją MIT i nie wchodzą do paczki npm. Wszelkie prawa zastrzeżone: nie
+  udzielam licencji na użycie ich na innych stronach (zob. `presets/wirelab/LICENSE.md`).

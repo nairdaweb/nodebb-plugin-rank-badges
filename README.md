@@ -223,5 +223,5 @@ npm run lint
 
 - **Code:** MIT © [nairda](https://wirelab.pl), see [LICENSE](LICENSE).
 - **Artwork of the `wirelab` preset** (`presets/wirelab/*.png`, `*.svg`): © nairda (wirelab.pl), **not**
-  covered by the MIT licence and not included in the npm package. Its licence terms have not been
-  decided yet (see `presets/wirelab/LICENSE.md` in the repository); until then no licence is granted.
+  covered by the MIT licence and not included in the npm package. All rights reserved: no licence is
+  granted to use it on other sites (see `presets/wirelab/LICENSE.md`).
