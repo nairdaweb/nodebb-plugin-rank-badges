@@ -3,12 +3,15 @@
 /*
  * nodebb-plugin-rank-badges: forum-side script, bundled into NodeBB's client JS through
  * "scripts" in plugin.json (runs on every forum page, not in the ACP).
- * 1. Missing badge image → show the level bar instead.
+ * 1. Missing badge image → CSS fallback (level bar, group icon or a generic icon).
  * 2. Profile pages: put the badge next to the group badges in the account header.
+ * 3. Posts that arrive over the websocket (new replies from other users, infinite scroll for
+ *    guests) were rendered without knowing the viewer's language; their badges are replaced by
+ *    the same badges in the viewer's language from the ladder route.
  */
 (function () {
 	/**
-	 * Switches a badge to its level-bar fallback (CSS: .rank-badge--image-failed).
+	 * Switches a badge to its fallback (CSS: .rank-badge--image-failed).
 	 *
 	 * @param {HTMLImageElement} img broken badge image
 	 * @returns {void}
@@ -39,9 +42,9 @@
 	}
 
 	/**
-	 * Puts ajaxify.data.rankBadge (set by library.js onAccountData) into the account header.
-	 * Themes have no slot for it there, hence the DOM insertion. Guarded against double
-	 * insertion because ajaxify.end can fire more than once per page.
+	 * Puts ajaxify.data.rankBadge (set by library.js onAccountData, already translated by the
+	 * server) into the account header. Themes have no slot for it there, hence the DOM insertion.
+	 * Guarded against double insertion because ajaxify.end can fire more than once per page.
 	 *
 	 * @returns {void}
 	 */
@@ -50,14 +53,64 @@
 		if (!data || !data.rankBadge || !data.rankBadge.html) return;
 		const target = document.querySelector('[component="user/badges"]');
 		if (!target || target.querySelector('.rank-badge')) return;
-		require(['translator'], function (translator) {
-			translator.translate(data.rankBadge.html, function (html) {
-				if (target.querySelector('.rank-badge')) return;
-				const wrap = document.createElement('span');
-				wrap.className = 'rank-badges-profile';
-				wrap.innerHTML = html; // server-built, all admin input escaped
-				target.prepend(wrap);
-				checkLoaded(wrap);
+		const wrap = document.createElement('span');
+		wrap.className = 'rank-badges-profile';
+		wrap.innerHTML = data.rankBadge.html; // server-built, all admin input escaped
+		target.prepend(wrap);
+		checkLoaded(wrap);
+	}
+
+	/** Badge HTML by id ("r2", "s0") per language, loaded once per language and page session. */
+	const ladders = {};
+
+	/**
+	 * @param {string} lang
+	 * @returns {Promise<Object<string, string>>} id → badge HTML (small size)
+	 */
+	function loadLadder(lang) {
+		if (!ladders[lang]) {
+			const url = config.relative_path + '/api/v3/plugins/rank-badges/ladder?lang=' + encodeURIComponent(lang);
+			ladders[lang] = fetch(url, { credentials: 'same-origin' })
+				.then(function (res) { return res.ok ? res.json() : {}; })
+				.then(function (body) {
+					const data = (body && body.response) || {};
+					const map = {};
+					(data.ladder || []).concat(data.groups || []).forEach(function (b) {
+						if (b && b.id && b.html) map[b.id] = b.html;
+					});
+					return map;
+				})
+				.catch(function () { return {}; });
+		}
+		return ladders[lang];
+	}
+
+	/**
+	 * Replaces post badges rendered in another language than the viewer's (data-rb-lang) with
+	 * the same badge (data-rb id) from the ladder route. Profile badges (large size) are
+	 * rendered for the viewer on the server and are left alone.
+	 *
+	 * @param {ParentNode} [root=document]
+	 * @returns {void}
+	 */
+	function relocalize(root) {
+		const lang = window.config && config.userLang;
+		if (!lang) return;
+		const stale = Array.prototype.filter.call(
+			(root || document).querySelectorAll('.rank-badge[data-rb][data-rb-lang]:not(.rank-badge--lg)'),
+			function (el) { return el.getAttribute('data-rb-lang') !== lang; }
+		);
+		if (!stale.length) return;
+		loadLadder(lang).then(function (map) {
+			stale.forEach(function (el) {
+				const html = map[el.getAttribute('data-rb')];
+				if (!html || !el.parentNode) return;
+				const tpl = document.createElement('template');
+				tpl.innerHTML = html; // server-built, all admin input escaped
+				const fresh = tpl.content.firstElementChild;
+				if (!fresh) return;
+				el.replaceWith(fresh);
+				checkLoaded(fresh.parentNode || document);
 			});
 		});
 	}
@@ -70,6 +123,7 @@
 	function onPage() {
 		checkLoaded();
 		injectProfileBadge();
+		relocalize();
 	}
 
 	if (window.jQuery) {
@@ -77,7 +131,7 @@
 	}
 	// Server-rendered first page: check images as soon as the DOM is ready.
 	if (document.readyState === 'loading') {
-		document.addEventListener('DOMContentLoaded', checkLoaded);
+		document.addEventListener('DOMContentLoaded', function () { checkLoaded(); });
 	} else {
 		checkLoaded();
 	}

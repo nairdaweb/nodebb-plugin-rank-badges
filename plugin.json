@@ -6,15 +6,18 @@
 		{ "hook": "static:app.load", "method": "init" },
 		{ "hook": "static:api.routes", "method": "addApiRoutes" },
 		{ "hook": "filter:admin.header.build", "method": "addAdminNavigation" },
+		{ "hook": "filter:settings.set", "method": "onSettingsSave" },
 		{ "hook": "action:settings.set", "method": "onSettingsSet" },
 		{ "hook": "filter:posts.getUserInfoForPosts", "method": "onGetUserInfoForPosts" },
+		{ "hook": "filter:topics.addPostData", "method": "onAddPostData" },
 		{ "hook": "filter:helpers.getUserDataByUserSlug", "method": "onAccountData" },
 		{ "hook": "filter:middleware.render", "method": "onRender", "priority": 20 }
 	],
 	"scss": ["scss/rank-badges.scss"],
 	"scripts": ["public/client.js"],
 	"modules": {
-		"../admin/plugins/rank-badges.js": "public/admin.js"
+		"../admin/plugins/rank-badges.js": "public/admin.js",
+		"rank-badges/ranks.js": "lib/ranks.js"
 	},
 	"staticDirs": {
 		"presets": "presets"
