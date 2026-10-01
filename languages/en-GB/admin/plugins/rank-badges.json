@@ -72,5 +72,11 @@
 	"warn.order": "Rank %1 has a lower threshold than the rank before it. Ranks are evaluated by position, so a more active user may get a lower-looking rank.",
 	"warn.equal": "Rank %1 has the same thresholds as the rank before it, so the rank before it is never shown.",
 	"warn.group-missing": "Group \"%1\" does not exist, so its badge is not shown. If a group with this exact name is created later, its members get the badge.",
-	"warn.group-hidden": "Group \"%1\" is hidden, so its badge is not shown unless \"Show if hidden\" is ticked."
+	"warn.group-hidden": "Group \"%1\" is hidden, so its badge is not shown unless \"Show if hidden\" is ticked.",
+	"update.available": "Version %1 is available",
+	"update.notes": "what's new",
+	"update.private": "update it with the deployment script",
+	"update.check": "Check for updates",
+	"update.check-help": "Once a day the forum fetches the latest version number of this plugin from updates.wirelab.pl: a plain GET request, nothing about the forum is sent. When this is off, no requests are made.",
+	"update.saved": "Update check setting saved"
 }

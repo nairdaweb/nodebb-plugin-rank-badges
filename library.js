@@ -35,9 +35,18 @@ const render = require('./lib/render');
 const LRU = require('./lib/lru');
 const { pickLang, isLangCode } = require('./lib/lang');
 const { BASE_OPTIONS: RATE_LIMIT, onPageLimit } = require('./lib/rate-limit');
+const updateCheck = require('./lib/update-check');
 
 /** Hash under which meta.settings stores the plugin configuration (also used by public/admin.js). */
 const SETTINGS_KEY = 'rank-badges';
+
+// Update notices on the ACP page (lib/update-check.js); public plugin, with a link to the release notes.
+const updates = updateCheck.forNodeBB({
+	id: 'nodebb-plugin-rank-badges',
+	version: require('./package.json').version,
+	isPrivate: false,
+	settingsHash: `${SETTINGS_KEY}-update-check`,
+});
 /** Sub-folder of NodeBB's upload_path for badge images uploaded from the ACP. */
 const UPLOAD_FOLDER = 'rank-badges';
 /** How long "is this user a category moderator" answers are reused, in ms. */
@@ -476,6 +485,7 @@ plugin.init = async function ({ router }) {
 			presets: listPresets(),
 			groupList: await listGroups(),
 			reputationDisabled: !!meta.config['reputation:disabled'],
+			...(await updates.templateData()),
 		});
 	});
 
@@ -488,6 +498,7 @@ plugin.init = async function ({ router }) {
 	}
 
 	pubsub.on(`action:settings.set.${SETTINGS_KEY}`, invalidate);
+	updates.start();
 };
 
 /**

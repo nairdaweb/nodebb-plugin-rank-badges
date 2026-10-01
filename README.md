@@ -217,6 +217,20 @@ learn which topic is being read; it still sees the viewer's IP address, so prefe
 
 **Review and scanning.** Every release runs the unit tests and the linter. In October 2026 the code went through an independent code review and a Snyk Code scan; all reported issues were fixed, and the scan showed no open findings at that time. This is a point-in-time result, not a guarantee. Please report vulnerabilities privately — see [SECURITY.md](SECURITY.md).
 
+## Update notices
+
+Once a day the plugin asks [updates.wirelab.pl](https://updates.wirelab.pl) whether a newer version
+exists, and shows "Version X is available — what's new" on its ACP page when it does.
+
+- **What is sent:** nothing beyond a plain `GET https://updates.wirelab.pl/api/nodebb-plugin-rank-badges.json`. No
+  query string, no cookies, no forum URL, user or usage data. The `User-Agent` header is
+  `nodebb-plugin-rank-badges/<installed version>`. As with any web request, the server (GitHub Pages) sees the
+  forum server's IP address.
+- **How often:** at most once a day, in the background and when the ACP page is opened (from a cache
+  kept in the database). 5 s timeout; network errors are logged at verbose level only.
+- **Switching it off:** ACP → Plugins → this plugin → "Check for updates". When it is off, no request
+  is made at all.
+
 ## Development
 
 ```sh

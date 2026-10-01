@@ -72,5 +72,11 @@
 	"warn.order": "Ranga %1 ma niższy próg niż ranga przed nią. Rangi są oceniane według pozycji, więc bardziej aktywny użytkownik może dostać rangę, która wygląda na niższą.",
 	"warn.equal": "Ranga %1 ma takie same progi jak ranga przed nią, więc tamta nigdy nie zostanie pokazana.",
 	"warn.group-missing": "Grupa „%1” nie istnieje, więc jej odznaka nie jest pokazywana. Jeśli później powstanie grupa o dokładnie tej nazwie, jej członkowie dostaną odznakę.",
-	"warn.group-hidden": "Grupa „%1” jest ukryta, więc jej odznaka nie jest pokazywana bez opcji „Pokaż mimo ukrycia”."
+	"warn.group-hidden": "Grupa „%1” jest ukryta, więc jej odznaka nie jest pokazywana bez opcji „Pokaż mimo ukrycia”.",
+	"update.available": "Dostępna wersja %1",
+	"update.notes": "co nowego",
+	"update.private": "zaktualizuj skryptem wdrożenia",
+	"update.check": "Sprawdzaj aktualizacje",
+	"update.check-help": "Raz na dobę forum pobiera z updates.wirelab.pl numer najnowszej wersji tego pluginu: zwykłe zapytanie GET, bez wysyłania żadnych danych o forum. Gdy wyłączone, nie ma żadnych zapytań.",
+	"update.saved": "Zapisano ustawienie sprawdzania aktualizacji"
 }
