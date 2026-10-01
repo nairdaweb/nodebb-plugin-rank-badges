@@ -60,12 +60,21 @@
 		checkLoaded(wrap);
 	}
 
-	/** Badge HTML by id ("r2", "s0") per language, loaded once per language and page session. */
+	/** Badge data by id ("r2", "s0") per language, loaded once per language and page session. */
 	const ladders = {};
 
 	/**
+	 * @returns {Promise<object>} lib/badge-dom.js (exposed as "rank-badges/badge-dom" in plugin.json)
+	 */
+	function badgeDom() {
+		return new Promise(function (resolve) {
+			require(['rank-badges/badge-dom'], resolve);
+		});
+	}
+
+	/**
 	 * @param {string} lang
-	 * @returns {Promise<Object<string, string>>} id → badge HTML (small size)
+	 * @returns {Promise<Object<string, object>>} id → badge description (`view`, small size)
 	 */
 	function loadLadder(lang) {
 		if (!ladders[lang]) {
@@ -76,7 +85,7 @@
 					const data = (body && body.response) || {};
 					const map = {};
 					(data.ladder || []).concat(data.groups || []).forEach(function (b) {
-						if (b && b.id && b.html) map[b.id] = b.html;
+						if (b && b.id && b.view) map[b.id] = b.view;
 					});
 					return map;
 				})
@@ -101,13 +110,14 @@
 			function (el) { return el.getAttribute('data-rb-lang') !== lang; }
 		);
 		if (!stale.length) return;
-		loadLadder(lang).then(function (map) {
+		Promise.all([loadLadder(lang), badgeDom()]).then(function (results) {
+			const map = results[0];
+			const BadgeDom = results[1];
 			stale.forEach(function (el) {
-				const html = map[el.getAttribute('data-rb')];
-				if (!html || !el.parentNode) return;
-				const tpl = document.createElement('template');
-				tpl.innerHTML = html; // server-built, all admin input escaped
-				const fresh = tpl.content.firstElementChild;
+				const view = map[el.getAttribute('data-rb')];
+				if (!view || !el.parentNode) return;
+				// Built from the badge data with DOM methods; no HTML from the response is parsed.
+				const fresh = BadgeDom.build(document, view);
 				if (!fresh) return;
 				el.replaceWith(fresh);
 				checkLoaded(fresh.parentNode || document);

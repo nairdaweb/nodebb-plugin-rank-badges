@@ -17,7 +17,8 @@
 	"scripts": ["public/client.js"],
 	"modules": {
 		"../admin/plugins/rank-badges.js": "public/admin.js",
-		"rank-badges/ranks.js": "lib/ranks.js"
+		"rank-badges/ranks.js": "lib/ranks.js",
+		"rank-badges/badge-dom.js": "lib/badge-dom.js"
 	},
 	"staticDirs": {
 		"presets": "presets"

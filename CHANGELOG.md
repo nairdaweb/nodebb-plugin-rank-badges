@@ -3,6 +3,19 @@
 All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [1.1.1] - 2026-10-01
+
+### Security
+- ACP preview and badges re-rendered in the viewer's language are built with DOM methods from the
+  badge data that the ladder route now also returns (`view`: classes, data attributes, colour,
+  image, icon, bar, plain-text name and label; `lib/badge-dom.js`). Classes, colours, icons and
+  image URLs (forum paths or https only) are checked again in the browser; no HTML from the response
+  is inserted any more. `html` stays in the response for other consumers.
+- Request limits per user (guests: per IP address), counted in memory without new dependencies
+  (`lib/ratelimit.js`): 60 loads of the ACP page and 300 requests to the ladder route per minute.
+  Above the limit the answer is `429` with `Retry-After`.
+- Findings reported by Snyk Code (CWE-79, CWE-770).
+
 ## [1.1.0] - 2026-09-27
 
 ### Changed

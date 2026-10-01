@@ -14,7 +14,7 @@
  * ajaxify.data.defaults, defaultNames, groupList and reputationDisabled come from the route in
  * library.js.
  */
-define('admin/plugins/rank-badges', ['settings', 'alerts', 'translator', 'rank-badges/ranks'], function (Settings, alerts, translator, R) {
+define('admin/plugins/rank-badges', ['settings', 'alerts', 'translator', 'rank-badges/ranks', 'rank-badges/badge-dom'], function (Settings, alerts, translator, R, BadgeDom) {
 	const ACP = {};
 	const HASH = 'rank-badges';
 	const PLUGIN_ID = 'nodebb-plugin-rank-badges';
@@ -464,17 +464,24 @@ define('admin/plugins/rank-badges', ['settings', 'alerts', 'translator', 'rank-b
 	}
 
 	/**
-	 * Shows the saved badges, rendered and translated by the server exactly as on the forum,
-	 * using the public ladder route. It reflects the saved settings, so it is refreshed after
-	 * each save.
+	 * Shows the saved badges, translated by the server exactly as on the forum, using the public
+	 * ladder route. It reflects the saved settings, so it is refreshed after each save. The
+	 * badges are built from their data (`view`) with DOM methods (lib/badge-dom.js); no HTML
+	 * from the response is parsed.
 	 *
 	 * @returns {void}
 	 */
 	function preview() {
 		$.getJSON(config.relative_path + '/api/v3/plugins/rank-badges/ladder?lang=' + encodeURIComponent(config.acpLang || 'en-GB')).then(function (res) {
-			const data = res.response || {};
-			const html = (data.ladder || []).concat(data.groups || []).map(function (r) { return r.html; }).join('');
-			$('#rb-preview').html(html); // server-built, all admin input escaped
+			const data = (res && res.response) || {};
+			const target = document.getElementById('rb-preview');
+			if (!target) return;
+			const nodes = [];
+			(data.ladder || []).concat(data.groups || []).forEach(function (r) {
+				const badge = r && BadgeDom.build(document, r.view);
+				if (badge) nodes.push(badge);
+			});
+			target.replaceChildren.apply(target, nodes);
 		}, function (xhr) {
 			alerts.error(tx('preview-error', xhr.status));
 		});

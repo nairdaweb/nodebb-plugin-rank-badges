@@ -201,10 +201,14 @@ set `--rank-badge-accent-fg`.
 ### Read-only API
 
 `GET /api/v3/plugins/rank-badges/ladder?lang=en-GB` returns the effective mode, the ranks (`id`,
-`level`, thresholds, `name`, `html`) and the group badges that can appear on posts (`id`, `name`,
-`html`, without the group name), in the requested language (default: the viewer's). It answers
-`403` when the viewer cannot read any category, e.g. guests on a forum closed to guests. The
-plugin's client script uses it to translate badges of posts that arrive over the websocket.
+`level`, thresholds, `name`, `html`, `view`) and the group badges that can appear on posts (`id`,
+`name`, `html`, `view`, without the group name), in the requested language (default: the viewer's).
+`view` is the same badge as plain data (classes, data attributes, colour, image, icon, bar, plain-text
+name and label); the plugin's scripts build badges from it with DOM methods (`lib/badge-dom.js`)
+instead of inserting HTML. The route answers `403` when the viewer cannot read any category, e.g.
+guests on a forum closed to guests, and `429` after 300 requests per minute from one user or IP
+address. The plugin's client script uses it to translate badges of posts that arrive over the
+websocket.
 
 External images get `referrerpolicy="no-referrer"` and `loading="lazy"`, so the image host does not
 learn which topic is being read; it still sees the viewer's IP address, so prefer uploaded images.

@@ -1,6 +1,6 @@
 {
   "name": "nodebb-plugin-rank-badges",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Rank badges for NodeBB 4: ranks from post count and/or reputation, group badges (Administrator, Moderator, any group), optional images and a level bar. Configured in the ACP; forum and ACP translated (en-GB, pl).",
   "main": "library.js",
   "license": "MIT",

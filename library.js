@@ -33,6 +33,7 @@ const ranks = require('./lib/ranks');
 const render = require('./lib/render');
 const LRU = require('./lib/lru');
 const { pickLang, isLangCode } = require('./lib/lang');
+const { createLimiter } = require('./lib/ratelimit');
 
 /** Hash under which meta.settings stores the plugin configuration (also used by public/admin.js). */
 const SETTINGS_KEY = 'rank-badges';
@@ -283,6 +284,10 @@ async function buildBadge(config, info, lang, size) {
 		if (started === generation) htmlCache.set(key, badge);
 	}
 	const copy = Object.assign({}, badge);
+	// `view` (badge as data, lib/render.js) is sent only by the ladder route, so it stays out of
+	// post and profile data.
+	delete copy.view;
+	Object.defineProperty(copy, 'view', { value: badge.view, enumerable: false });
 	// Non-enumerable, so they never end up in the JSON sent to the browser; relocalize() uses
 	// them to re-render the same badge in another language.
 	Object.defineProperty(copy, '_info', { value: info, enumerable: false });
@@ -437,6 +442,19 @@ async function listGroups() {
 
 // ---------------------------------------------------------------- hooks
 
+/*
+ * Request limits per user (guests: per IP address), counted in memory by each NodeBB process
+ * (lib/ratelimit.js). Generous for normal use; they only stop scripted floods.
+ */
+const limits = {
+	adminPage: createLimiter({ windowMs: 60 * 1000, max: 60 }),
+	api: createLimiter({
+		windowMs: 60 * 1000,
+		max: 300,
+		onLimit: (req, res) => controllerHelpers.formatApiResponse(429, res),
+	}),
+};
+
 /**
  * Registers the ACP page, creates the upload folder and subscribes to settings changes made
  * in other NodeBB processes.
@@ -448,7 +466,7 @@ async function listGroups() {
  */
 plugin.init = async function ({ router }) {
 	// setupAdminPageRoute adds NodeBB's admin middleware, so only administrators reach this page.
-	routeHelpers.setupAdminPageRoute(router, '/admin/plugins/rank-badges', [], async (req, res) => {
+	routeHelpers.setupAdminPageRoute(router, '/admin/plugins/rank-badges', [limits.adminPage], async (req, res) => {
 		res.render('admin/plugins/rank-badges', {
 			title: '[[admin/plugins/rank-badges:title]]',
 			defaults: ranks.defaults(),
@@ -487,7 +505,7 @@ plugin.init = async function ({ router }) {
  * @returns {Promise<void>}
  */
 plugin.addApiRoutes = async function ({ router }) {
-	routeHelpers.setupApiRoute(router, 'get', '/rank-badges/ladder', [], async (req, res) => {
+	routeHelpers.setupApiRoute(router, 'get', '/rank-badges/ladder', [limits.api], async (req, res) => {
 		const cids = await categories.getAllCidsFromSet('categories:cid');
 		const readable = await privileges.categories.filterCids('topics:read', cids.filter(cid => parseInt(cid, 10) > 0), req.uid);
 		if (!readable.length) return controllerHelpers.formatApiResponse(403, res);
@@ -501,7 +519,7 @@ plugin.addApiRoutes = async function ({ router }) {
 			const info = { special: false, index: i, level: i + 1, total, tier: ranks.tierFor(i + 1, total) };
 			const badge = await buildBadge(config, info, lang, 'sm');
 			// `name` is HTML (admin-typed names are escaped when rendered), like `html`.
-			return { id: `r${i}`, level: i + 1, minPosts: rank.minPosts, minReputation: rank.minReputation, name: badge.name, html: badge.html };
+			return { id: `r${i}`, level: i + 1, minPosts: rank.minPosts, minReputation: rank.minReputation, name: badge.name, html: badge.html, view: badge.view };
 		}));
 		const groupBadges = [];
 		for (const i of ranks.specialOrder(config.special)) {
@@ -509,7 +527,7 @@ plugin.addApiRoutes = async function ({ router }) {
 			if (!isDisplayable(entry, metaMap)) continue;
 			const info = { special: true, index: i, level: 0, total, tier: 0, hidden: metaMap.get(entry.group).hidden };
 			const badge = await buildBadge(config, info, lang, 'sm');
-			groupBadges.push({ id: `s${i}`, name: badge.name, html: badge.html });
+			groupBadges.push({ id: `s${i}`, name: badge.name, html: badge.html, view: badge.view });
 		}
 		const mode = ranks.effectiveMode(config.mode, !!meta.config['reputation:disabled']);
 		controllerHelpers.formatApiResponse(200, res, { mode, lang, ladder, groups: groupBadges });

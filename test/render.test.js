@@ -200,3 +200,40 @@ test('render: relative_path is added only when missing', async () => {
 	assert.match((await badge(c, ranks.describe(c, {}), { relativePath: '/forum' })).html, /src="\/forum\/forum-logo.png"/);
 	assert.match((await badge(c, ranks.describe(c, { postcount: 1 }), { relativePath: '/forum' })).html, /src="\/forum\/x.png"/);
 });
+
+test('render: view describes the same badge as data, with plain-text name and label', async () => {
+	const c = cfg({ ranks: JSON.stringify([{ names: { en: 'A & <B> [[global:home]]' } }, { names: { en: 'Two' }, minPosts: 1, image: '/img/r2.png', color: '#123456' }]) });
+	const one = await badge(c, ranks.describe(c, { postcount: 0 }));
+	assert.deepEqual(one.view, {
+		classes: ['rank-badge', 'rank-badge--tier-2'],
+		data: { 'data-rb': 'r0', 'data-rb-lang': 'en-GB', 'data-level': '1', 'data-total': '2' },
+		accent: '',
+		accentFg: '',
+		image: '',
+		fallbackIcon: false,
+		icon: '',
+		bar: { segments: [true, false] },
+		label: 'Rank 1 of 2: A & <B> [[global:home]]',
+		name: 'A & <B> [[global:home]]',
+	});
+	const two = await badge(c, ranks.describe(c, { postcount: 5 }), { relativePath: '/forum' });
+	assert.equal(two.view.image, '/forum/img/r2.png');
+	assert.equal(two.view.accent, '#123456');
+	assert.ok(two.view.classes.includes('rank-badge--image'));
+
+	const d = cfg({ showBar: 'off' });
+	const token = await badge(d, ranks.describe(d, { postcount: 30, reputation: 6 }));
+	assert.equal(token.view.name, 'Tinkerer');
+	assert.equal(token.view.bar, null);
+	const s = await badge(d, ranks.describe(d, {}, new Set(['administrators'])));
+	assert.equal(s.view.icon, 'fa-shield-halved');
+	assert.equal(s.view.data['data-group'], 'administrators');
+	assert.equal(s.view.label, 'Administrator');
+	assert.equal(s.view.labelToken, undefined);
+});
+
+test('render: decodeEntities turns translated text into plain text', () => {
+	assert.equal(render.decodeEntities('A &amp; &lt;B&gt; &quot;x&quot; &#39;y&#39; &lsqb;z&rsqb; &#x41;'), 'A & <B> "x" \'y\' [z] A');
+	assert.equal(render.decodeEntities('&unknown; &#0; &amp;lt;'), '&unknown; &#0; &lt;');
+	assert.equal(render.decodeEntities(null), '');
+});
