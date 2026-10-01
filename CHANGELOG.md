@@ -3,6 +3,14 @@
 All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [1.1.2] - 2026-10-01
+
+### Security
+- Use express-rate-limit for the request limits.
+  Unchanged (60 ACP page loads and 300 `ladder` requests per minute per user, guests per IP
+  address, IPv6 grouped by /56) and now come from `express-rate-limit` (new dependency), which
+  replaces `lib/ratelimit.js`.
+
 ## [1.1.1] - 2026-10-01
 
 ### Security

@@ -16,6 +16,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { rateLimit } = require('express-rate-limit');
 
 const nconf = require.main.require('nconf');
 const winston = require.main.require('winston');
@@ -33,7 +34,7 @@ const ranks = require('./lib/ranks');
 const render = require('./lib/render');
 const LRU = require('./lib/lru');
 const { pickLang, isLangCode } = require('./lib/lang');
-const { createLimiter } = require('./lib/ratelimit');
+const { BASE_OPTIONS: RATE_LIMIT, onPageLimit } = require('./lib/rate-limit');
 
 /** Hash under which meta.settings stores the plugin configuration (also used by public/admin.js). */
 const SETTINGS_KEY = 'rank-badges';
@@ -443,15 +444,15 @@ async function listGroups() {
 // ---------------------------------------------------------------- hooks
 
 /*
- * Request limits per user (guests: per IP address), counted in memory by each NodeBB process
- * (lib/ratelimit.js). Generous for normal use; they only stop scripted floods.
+ * Request limits per user (guests: per IP address) per minute, with express-rate-limit
+ * (lib/rate-limit.js). Generous for normal use; they only stop scripted floods.
  */
 const limits = {
-	adminPage: createLimiter({ windowMs: 60 * 1000, max: 60 }),
-	api: createLimiter({
-		windowMs: 60 * 1000,
-		max: 300,
-		onLimit: (req, res) => controllerHelpers.formatApiResponse(429, res),
+	adminPage: rateLimit({ ...RATE_LIMIT, limit: 60, handler: onPageLimit }),
+	api: rateLimit({
+		...RATE_LIMIT,
+		limit: 300,
+		handler: (req, res) => controllerHelpers.formatApiResponse(429, res),
 	}),
 };
 
