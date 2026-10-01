@@ -213,6 +213,10 @@ websocket.
 External images get `referrerpolicy="no-referrer"` and `loading="lazy"`, so the image host does not
 learn which topic is being read; it still sees the viewer's IP address, so prefer uploaded images.
 
+## Security
+
+**Review and scanning.** Every release runs the unit tests and the linter. In October 2026 the code went through an independent code review and a Snyk Code scan; all reported issues were fixed, and the scan showed no open findings at that time. This is a point-in-time result, not a guarantee. Please report vulnerabilities privately — see [SECURITY.md](SECURITY.md).
+
 ## Development
 
 ```sh
