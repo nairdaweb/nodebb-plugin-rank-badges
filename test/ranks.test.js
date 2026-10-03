@@ -274,3 +274,19 @@ test('parseLangList keeps valid, unique codes in order', () => {
 	assert.deepEqual(ranks.parseLangList('en-GB, pl, x y, pl, zh_CN'), ['en-GB', 'pl', 'zh_CN']);
 	assert.deepEqual(ranks.parseLangList(''), []);
 });
+
+test('describe: an external level replaces the post/reputation rank, clamped to the ladder', () => {
+	const c = ranks.normalize({});
+	const total = c.ranks.length;
+	assert.equal(ranks.describe(c, { postcount: 0 }, new Set(), { level: 3 }).level, 3);
+	assert.equal(ranks.describe(c, { postcount: 600, reputation: 200 }, new Set(), { level: 2 }).level, 2);
+	assert.equal(ranks.describe(c, { postcount: 0 }, new Set(), { level: 99 }).level, total);
+	assert.equal(ranks.describe(c, { postcount: 600, reputation: 200 }, new Set(), { level: 0 }).level, ranks.describe(c, { postcount: 600, reputation: 200 }).level);
+	assert.equal(ranks.describe(c, { postcount: 0 }, new Set(), { level: 1.5 }).level, ranks.describe(c, { postcount: 0 }).level);
+});
+
+test('describe: a group badge keeps precedence over an external level', () => {
+	const c = ranks.normalize({});
+	const admin = ranks.describe(c, { postcount: 0 }, new Set(['administrators']), { level: 4 });
+	assert.equal(admin.special, true);
+});

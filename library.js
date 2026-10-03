@@ -26,6 +26,7 @@ const user = require.main.require('./src/user');
 const categories = require.main.require('./src/categories');
 const privileges = require.main.require('./src/privileges');
 const pubsub = require.main.require('./src/pubsub');
+const plugins = require.main.require('./src/plugins');
 const translator = require.main.require('./src/translator');
 const routeHelpers = require.main.require('./src/routes/helpers');
 const controllerHelpers = require.main.require('./src/controllers/helpers');
@@ -307,6 +308,28 @@ async function buildBadge(config, info, lang, size) {
 }
 
 /**
+ * Lets other plugins supply a rank level for users (e.g. a combined score from another system).
+ * Hook: filter:rank-badges.level, called with `{ uids, users, levels }`; a listener sets
+ * `levels[uid]` to an integer (1 = lowest rank, clamped to the ladder). A throwing listener
+ * leaves the post/reputation ranks untouched.
+ *
+ * @param {Array<object|null>} users
+ * @param {Array<number|string>} uids local uids of `users`
+ * @returns {Promise<Object<string, number>>} uid → level
+ */
+async function levelOverrides(users, uids) {
+	if (!uids.length) return {};
+	try {
+		const out = await plugins.hooks.fire('filter:rank-badges.level', { uids, users, levels: {} });
+		const levels = (out && out.levels) || {};
+		return Object.fromEntries(Object.entries(levels).filter(([, v]) => Number.isInteger(v) && v >= 1));
+	} catch (err) {
+		winston.warn(`[rank-badges] filter:rank-badges.level failed: ${err.message}`);
+		return {};
+	}
+}
+
+/**
  * Badge data for a list of user objects. Group memberships are resolved in one batch for the
  * whole list (see getMemberships).
  *
@@ -324,9 +347,10 @@ async function badgesFor(users, lang, size) {
 	const uids = [...new Set(users.filter(u => u && isLocalUid(u.uid)).map(u => u.uid))];
 	const memberships = await getMemberships(config, uids, metaMap);
 	const mode = ranks.effectiveMode(config.mode, !!meta.config['reputation:disabled']);
+	const levels = await levelOverrides(users, uids);
 	return Promise.all(users.map((u) => {
 		if (!u || !isLocalUid(u.uid)) return null;
-		const info = ranks.describe(config, u, memberships.get(String(u.uid)), { mode });
+		const info = ranks.describe(config, u, memberships.get(String(u.uid)), { mode, level: levels[String(u.uid)] });
 		if (info && info.special) info.hidden = metaMap.get(config.special[info.index].group).hidden;
 		return buildBadge(config, info, lang, size);
 	}));

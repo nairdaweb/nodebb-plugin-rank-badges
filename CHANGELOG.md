@@ -3,6 +3,14 @@
 All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [1.3.0] - 2026-10-03
+
+### Added
+- `filter:rank-badges.level` hook for other plugins. It is called with `{ uids, users, levels }`; a listener sets
+  `levels[uid]` to an integer (1 = lowest rank, clamped to the ladder) and that level replaces the post/reputation rank
+  for that user. Group badges (administrators, moderators, ...) keep precedence. A listener that throws is logged and
+  ignored, so the normal ranks keep working. Without listeners nothing changes.
+
 ## [1.2.0] - 2026-10-01
 
 ### Added

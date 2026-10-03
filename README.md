@@ -198,6 +198,30 @@ Styling — override the variables, not the selectors:
 A group colour set as `var(--…)` cannot be evaluated on the server; its text stays white unless you
 set `--rank-badge-accent-fg`.
 
+### Supplying a level from another plugin
+
+Another plugin can decide a user's rank level (for example a combined score from a different system)
+with the `filter:rank-badges.level` hook. The hook receives `{ uids, users, levels }`; a listener sets
+`levels[uid]` to an integer, where `1` is the lowest rank:
+
+```js
+plugins.hooks.register('my-plugin', {
+	hook: 'filter:rank-badges.level',
+	method: async (data) => {
+		data.uids.forEach((uid) => { data.levels[uid] = lookupLevel(uid); });
+		return data;
+	},
+});
+```
+
+- The level **replaces** the post/reputation rank for that user, on posts and on profiles. Values above
+  the number of ranks are clamped to the highest rank; anything that is not an integer ≥ 1 is ignored.
+- **Group badges keep precedence** (administrators, moderators and your own groups are shown as before).
+- Users without an entry keep their normal rank. If a listener throws, a warning is logged and every
+  user keeps the normal rank, so a faulty listener cannot hide badges.
+- The hook runs once per request for all users of the page, so read your data in one batch
+  (for example `User.getUsersFields`) rather than one query per user.
+
 ### Read-only API
 
 `GET /api/v3/plugins/rank-badges/ladder?lang=en-GB` returns the effective mode, the ranks (`id`,
